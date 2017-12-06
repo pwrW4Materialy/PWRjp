@@ -3,6 +3,8 @@
  */
 package AnimatorApp;
 
+import io.reactivex.Observer;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -13,6 +15,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.nio.Buffer;
 import java.util.Random;
+import java.util.function.Consumer;
 
 /**
  * @author tb
@@ -23,6 +26,7 @@ public abstract class Figura implements Runnable, ActionListener {
 	// wspolny bufor
 	protected Graphics2D buffer;
 	protected Area area;
+	protected Area stopArea;
 	// do wykreslania
 	protected Shape shape;
 	// przeksztalcenie obiektu
@@ -38,6 +42,9 @@ public abstract class Figura implements Runnable, ActionListener {
 	private int width;
 	private int height;
 	private Color clr;
+
+	protected boolean stopAnim = false;
+	protected boolean resizeEvent = false;
 
 	protected static final Random rand = new Random();
 
@@ -76,6 +83,11 @@ public abstract class Figura implements Runnable, ActionListener {
 	}
 
 	protected Shape nextFrame() {
+
+		if(stopAnim && !resizeEvent){
+			return stopArea;
+		}
+
 		// zapamietanie na zmiennej tymczasowej
 		// aby nie przeszkadzalo w wykreslaniu
 		area = new Area(area);
@@ -83,10 +95,11 @@ public abstract class Figura implements Runnable, ActionListener {
 		Rectangle bounds = area.getBounds();
 		int cx = bounds.x + bounds.width / 2;
 		int cy = bounds.y + bounds.height / 2;
+
 		// odbicie
-		if (cx < 0 || cx > width)
+		if (cx < bounds.getWidth()/2 || cx > width - bounds.getWidth()/2)
 			dx = -dx;
-		if (cy < 0 || cy > height)
+		if (cy < bounds.getHeight()/2 || cy > height - bounds.getHeight()/2)
 			dy = -dy;
 		// zwiekszenie lub zmniejszenie
 		if (bounds.height > height / 3 || bounds.height < 10)
@@ -99,6 +112,10 @@ public abstract class Figura implements Runnable, ActionListener {
 		aft.translate(dx, dy);
 		// przeksztalcenie obiektu
 		area.transform(aft);
+
+		resizeEvent = false;
+		stopArea = area;
+
 		return area;
 	}
 
@@ -116,6 +133,12 @@ public abstract class Figura implements Runnable, ActionListener {
 		this.buffer = buffer;
 		this.width = w;
 		this.height = h;
+
+		resizeEvent = true;
+	}
+
+	public void toggleAnim(){
+		stopAnim = !stopAnim;
 	}
 
 }

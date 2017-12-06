@@ -8,8 +8,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.JButton;
 import java.awt.Dimension;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
@@ -25,21 +23,18 @@ public class AnimatorApp extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					final AnimatorApp frame = new AnimatorApp();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		EventQueue.invokeLater(() -> {
+			try {
+				final AnimatorApp frame = new AnimatorApp();
+				frame.setVisible(true);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}
 
 	/**
 	 * Create the frame.
-	 * @param delay 
 	 */
 	public AnimatorApp() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,31 +48,25 @@ public class AnimatorApp extends JFrame {
 		AnimPanel kanwa = new AnimPanel();
 		kanwa.setBounds(10, 11, 422, 219);
 		contentPane.add(kanwa);
-		SwingUtilities.invokeLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				kanwa.initialize();
-			}
-		});
+		SwingUtilities.invokeLater(kanwa::initialize);
 
 		JButton btnAdd = new JButton("Add");
-		btnAdd.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				kanwa.addFig();
-			}
-		});
+		btnAdd.addActionListener(actionEvent -> kanwa.addFig());
+
 		btnAdd.setBounds(10, getHeight() -30, 80, 23);
 		contentPane.add(btnAdd);
 		
 		JButton btnAnimate = new JButton("Animate");
-		btnAnimate.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				kanwa.animate();
-			}
-		});
-		btnAnimate.setBounds(100, getHeight()-30, 80, 23);
+		btnAnimate.addActionListener(actionEvent ->  kanwa.animate());
+
+		btnAnimate.setBounds(100, getHeight()-30, 80, 43);
 		contentPane.add(btnAnimate);
+
+		JButton btnPurge = new JButton("Clear");
+		btnPurge.addActionListener(actionEvent ->  kanwa.removeAllFigures());
+
+		btnPurge.setBounds(190, getHeight()-30, 80, 27);
+		contentPane.add(btnPurge);
 
 		this.addComponentListener(new ComponentListener() {
 			@Override
@@ -96,9 +85,20 @@ public class AnimatorApp extends JFrame {
 			}
 
 			public void componentResized(ComponentEvent e) {
-				kanwa.changeSize(getWidth()-45, getHeight()-45);
-				btnAdd.setBounds(10, getHeight() -20, 80, 23);
-				btnAnimate.setBounds(100, getHeight()-20, 80, 23);
+				int width = getWidth()-20;
+				int height = getHeight()-45;
+
+				if(width <= 0 ){
+					width = 1;
+				}
+				if(height <= 0){
+					height = 1;
+				}
+
+				kanwa.changeSize(width, height);
+				btnAdd.setBounds(10, getHeight() -25, 80, 23);
+				btnAnimate.setBounds(100, getHeight()-25, 80, 23);
+				btnPurge.setBounds(190, getHeight()-30, 80, 27);
 			}
 		});
 	}
